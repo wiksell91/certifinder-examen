@@ -8,7 +8,7 @@ import com.example.certifinderexamen.repository.CertstatusRepository;
 import com.example.certifinderexamen.repository.CertuserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ public class CertuserService {
 
     private final CertuserRepository certuserRepository;
     private final CertstatusRepository certstatusRepository;
-    private final PasswordEncoder passwordEncoder;
+
 
 
 
@@ -35,13 +35,13 @@ public class CertuserService {
 
     public Certuser addCertuser(Certuser certuser) {
         Boolean existsEmail = certuserRepository
-                .selectExistsEmail(certuser.getEmail());
+                .selectExistsUsername(certuser.getUsername());
         if (existsEmail){
             throw new BadRequestException(
-                    "Email " + certuser.getEmail() + " är upptaget");
+                    "Email " + certuser.getUsername() + " är upptaget");
         }
 
-        certuser.setPassword(passwordEncoder.encode(certuser.getPassword()));
+
         return certuserRepository.save(certuser);
     }
 
@@ -54,7 +54,7 @@ public class CertuserService {
 
 
     public Certuser getCertuser(String email){
-        return certuserRepository.findCertuserByEmail(email);
+        return certuserRepository.findCertuserByUsername(email);
     }
 
 

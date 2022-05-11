@@ -3,11 +3,15 @@ import {useState, useEffect} from "react";
 import {getAllCert, getAllOrders} from "../client";
 import { useSelector } from "react-redux";
 import authToken from "../utils/authToken";
+import { useNavigate } from "react-router-dom";
+import ajax from "../Service/fetchService";
+import { useUser } from "../UserProvider";
 import {Empty, Layout, Menu, Radio, Spin, Table, Button} from "antd";
 import NewOrderDrawer from "../NewOrderDrawer";
 import {ContactsOutlined, LoadingOutlined, MailOutlined, UploadOutlined, UserOutlined} from "@ant-design/icons";
 import '../App.css';
 import {errorNotification, successNotification} from "../Notification";
+
 
 const {Header, Content, Footer, Sider} = Layout;
 
@@ -51,19 +55,31 @@ const orders =  [
 const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
 
     function Cpage ()  {
-
-        if (localStorage.jwtToken) {
-            authToken(localStorage.jwtToken);
-        }
-
-        const auth = useSelector((state) => state.auth);
-
-
      const [certstatus, setCertstatus] = useState([]);
     const [orderreqs, setOrderreqs] = useState([]);
     const [fetching, setFetching] = useState(true);
     const [showDrawer, setShowDrawer] = useState(false);
     const [certuserId, setCertuserId] = useState(null);
+    const user = useUser();
+    const [company, setCompany] = useState(null);
+        const navigate = useNavigate();
+
+        useEffect(() => {
+            console.log("Value of user", user);
+            ajax("api/auth/userinfo", "GET", user.jwt).then((companyData) => {
+                setCompany(companyData);
+            });
+            if (!user.jwt) {
+                console.warn("No valid jwt found, redirecting to login page");
+                navigate("/");
+            }
+        }, [user.jwt]);
+
+        const logOut = () =>{
+            localStorage.clear();
+                navigate('/');
+        }
+
 
     const users  =  [
         {
@@ -200,7 +216,7 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
             case "2":
                 return  renderOrderreqs();
             case "3":
-                return ;
+                return <h4>Hello {company && `${company.id} ${company.fullName}`}</h4>;
             case "4":
                 return ;
             default:
@@ -238,12 +254,12 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
             </Menu>
         </Sider>
         <Layout>
-            <Header className="site-layout-sub-header-background" style={{padding: 0}}></Header>
+            <Header className="site-layout-sub-header-background" style={{padding: 0}} ><div style={{ display: "flex" }}><Button style={{ marginLeft: "auto" }}  type="primary" onClick={() =>logOut()}>Logga ut</Button></div></Header>
             <Content style={{margin: '24px 16px 0'}}>
                 <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
 
-                    {auth.username}
-                   {/* {handleItemClick(selectedMenuItem)}*/}
+                   {handleItemClick(selectedMenuItem)}
+
                 </div>
             </Content>
             <Footer style={{textAlign: 'center'}}>Certifinder ©2022 Created by Victor Wiksell</Footer>

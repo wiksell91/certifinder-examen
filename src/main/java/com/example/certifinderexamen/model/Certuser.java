@@ -34,7 +34,7 @@ public class Certuser implements UserDetails {
 
     private Long id;
     @Column(nullable = false, unique = true)
-    private String email;
+    private String username;
     @Column(nullable = false)
     private String password;
     //@Column(nullable = false)
@@ -68,7 +68,7 @@ public class Certuser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.username;
     }
 
     @Override

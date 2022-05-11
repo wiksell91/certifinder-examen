@@ -19,12 +19,12 @@ public interface CertuserRepository extends JpaRepository<Certuser, Long> {
             "SELECT CASE WHEN COUNT(c) > 0 THEN " +
             "TRUE ELSE FALSE END " +
             "FROM Certuser c " +
-            "WHERE c.email = ?1"
+            "WHERE c.username = ?1"
     )
-    Boolean selectExistsEmail(String email);
+    Boolean selectExistsUsername(String username);
 
-    Certuser findCertuserByEmail(String email);
+    Certuser findCertuserByUsername(String username);
 
-    Optional<Certuser> findByEmail(String email);
+    Optional<Certuser> findByUsername(String username);
 
 }

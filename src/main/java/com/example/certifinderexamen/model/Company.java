@@ -11,13 +11,14 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
 @Entity
-public class  Company implements UserDetails {
+public class Company implements UserDetails {
     @Id
     @SequenceGenerator(
             name = "user_sequence",
@@ -46,6 +47,9 @@ public class  Company implements UserDetails {
     @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinTable(name = "AUTH_USER_AUTHORITY", joinColumns = @JoinColumn(referencedColumnName = "id"),inverseJoinColumns = @JoinColumn(referencedColumnName ="id"))
     private List<Authority> authorities;
+
+    public Company(Certuser certuser, Optional<Object> empty) {
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

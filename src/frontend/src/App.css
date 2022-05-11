@@ -9,6 +9,10 @@
   pointer-events: none;
 }
 
+/*#logoutbutton{*/
+/*  display: flex;*/
+/*  justify-content: flex-end;*/
+/*}*/
 #components-layout-demo-responsive .logo {
   height: 32px;
   margin: 16px;

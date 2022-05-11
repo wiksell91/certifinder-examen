@@ -9,157 +9,97 @@ import {addNewCompany} from "../client";
 import '../App.css';
 import {errorNotification, successNotification} from "../Notification";
 import { UserOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
+import {useUser} from "../UserProvider";
+import {useNavigate} from "react-router-dom";
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 const { Header, Content, Footer, Sider } = Layout;
 
 
 
 
-function Mainpage  ()  {
+function Mainpage  () {
 
     const [submitting, setSubmitting] = useState(false);
-//
-//
-//     const loginCompany = ({loading,error,...props}) => {
-//
-//         const [values, setValues] = useState({
-//             username: '',
-//             password: ''
-//         });
-//
-//         const handleSubmit=(evt)=>{
-//             evt.preventDefault();
-//             props.authenticate();
-//
-//             userLogin(values).then((response)=>{
-//
-//                 console.log("response",response);
-//                 if(response.status===200){
-//                     props.setCompany(response.data);
-//                     props.history.push('/Cpage');
-//                 }
-//                 else{
-//                     props.loginFailure('Something Wrong!Please Try Again');
-//                 }
-//
-//
-//             }).catch((err)=>{
-//
-//                 if(err && err.response){
-//
-//                     switch(err.response.status){
-//                         case 401:
-//                             console.log("401 status");
-//                             props.loginFailure("Authentication Failed.Bad Credentials");
-//                             break;
-//                         default:
-//                             props.loginFailure('Something Wrong!Please Try Again');
-//
-//                     }
-//
-//                 }
-//                 else{
-//                     props.loginFailure('Something Wrong!Please Try Again');
-//                 }
-//
-//
-//
-//
-//             });
-//             //console.log("Loading again",loading);
-//
-//
-//         }
-//
-//         const handleChange = (e) => {
-//             e.persist();
-//             setValues(values => ({
-//                 ...values,
-//                 [e.target.name]: e.target.value
-//             }));
-//         };
-//
-//
-//
-//
-//         // const [error, setError] = useState();
-//         // const [show, setShow] = useState(true);
-//         //
-//         // const initialState = {
-//         //     username: "",
-//         //     password: "",
-//         // };
-//         //
-//         // const [company, setCompany]= useState(initialState);
-//         //
-//         // const credentialChange = (event) => {
-//         //     const { name, value } = event.target;
-//         //     setCompany({ ...company, [name]: value });
-//         // };
-//         //
-//         // const dispatch = useDispatch();
-//         //
-//         // const validateUser = () => {
-//         //     dispatch(authenticateUser(company.username, company.password))
-//         //         .then((response) => {
-//         //             console.log(response.data);
-//         //             return props.history.push("/companypage");
-//         //         })
-//         //         .catch((error) => {
-//         //             console.log(error.message);
-//         //             //setShow(true);
-//         //             //resetLoginForm();
-//         //             setError("Invalid email and password");
-//         //         });
-//         // };
-//
-//         // const resetLoginForm = () => {
-//         //     setCompany(initialState);
-//         // };
-//
-//         return (
-//             <Form
-//                 name="normal_login"
-//                 className="login-form login-width"
-//                 initialValues={{remember: true}}
-//
-//             >
-//                 <Form.Item
-//                     type="text"
-//                     rules={[{required: true, message: 'Please input your Username!'}]}
-//                 >
-//                     <Input                     name="username"
-//                                                id="username"
-//                                                value={values.username}
-//                                                onChange={handleChange}  prefix={<UserOutlined className="site-form-item-icon"/>} placeholder="Email"/>
-//                 </Form.Item>
-//                 <Form.Item
-//                     required
-//                     autoComplete="off"
-//                     type="password"
-//
-//                     rules={[{required: true, message: 'Please input your Password!'}]}
-//                 >
-//                     <Input                     name="password"
-//                                                id="password"
-//                                                value={values.password}
-//                                                onChange={handleChange}
-//                         prefix={<LockOutlined className="site-form-item-icon"/>}
-//                         type="password"
-//                         placeholder="Lösenord"
-//
-//                     />
-//                     <Button type="primary" htmlType="submit" className="login-form-button" variant="success" onClick={handleSubmit} noValidate={false}>
-//                         Log in {loading}
-//                     </Button>
-//                 </Form.Item>
-//             </Form>
-//         )
-//
-//     }
-//
-//
+    const user = useUser();
+    const navigate = useNavigate();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [errorMsg, setErrorMsg] = useState(null);
 
+    const loginCompany = () => {
+
+
+    function sendLoginRequest() {
+        setErrorMsg("");
+        const reqBody = {
+            username: username,
+            password: password,
+        };
+
+        fetch("api/auth/companylogin", {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            method: "post",
+            body: JSON.stringify(reqBody),
+        })
+            .then((response) => {
+                if (response.status === 200) return response.text();
+                else if (response.status === 401 || response.status === 403) {
+                    setErrorMsg("Invalid username or password");
+                } else {
+                    setErrorMsg(
+                        "Something went wrong, try again later or reach out to trevor@coderscampus.com"
+                    );
+                }
+            })
+            .then((data) => {
+                if (data) {
+                    user.setJwt(data);
+                    navigate("/cpage");
+                }
+            });
+    }
+
+
+    return (
+
+        <Form
+            name="normal_login"
+            className="login-form login-width"
+            initialValues={{remember: true}}>
+            <Form.Item
+                controlId="username"
+                type="text"
+                rules={[{required: true, message: 'Please input your Username!'}]}>
+                <Input type="text"
+                       name="username"
+                       value={username}
+                       onChange={(e) => setUsername(e.target.value)}
+                       className={"bg-dark text-white"}
+                       placeholder="Enter Email Address"/>
+            </Form.Item>
+            <Form.Item
+                required
+                autoComplete="off"
+                type="password"
+                controlId="password"
+                rules={[{required: true, message: 'Please input your Password!'}]}>
+                <Input type="password"
+                       name="password"
+                       value={user.password}
+                       onChange={(e) => setPassword(e.target.value)}
+                       className={"bg-dark text-white"}
+                       placeholder="Enter Password"
+                />
+                <Button type="primary" htmlType="submit" className="login-form-button" variant="success"
+                        onClick={() => sendLoginRequest()}>
+                    Log in
+                </Button>
+            </Form.Item>
+        </Form>
+    )
+}
     const listlayout = {
         labelCol: { span: 4 },
         wrapperCol: { span: 4 },
@@ -219,7 +159,7 @@ function Mainpage  ()  {
                 </Row>
             </Form>
         );
-    };
+    }
 
 
 
@@ -233,7 +173,7 @@ function Mainpage  ()  {
             case "3":
                 return "feeeeeeliyggi";
             case "4":
-                return ;
+                return loginCompany();
             default:
                 break;
 
@@ -278,7 +218,6 @@ function Mainpage  ()  {
             <Footer style={{textAlign: 'center'}}>Certifinder ©2022 Created by Victor Wiksell</Footer>
         </Layout>
     </Layout>
-
 }
 // const mapStateToProps=({auth})=>{
 //     console.log("state ",auth)
@@ -297,4 +236,4 @@ function Mainpage  ()  {
 //     }
 // }
 
-export default (Mainpage);
+export default Mainpage;

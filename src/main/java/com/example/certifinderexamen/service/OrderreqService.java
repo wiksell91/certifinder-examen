@@ -44,7 +44,7 @@ public class OrderreqService {
     }
 
     public List<Orderreq> getUsersOrders(String email){
-        Optional<Certuser> certuser = certuserRepository.findByEmail(email);
+        Optional<Certuser> certuser = certuserRepository.findByUsername(email);
         return orderreqRepository.findOrderreqByCertuser(certuser.get());
     }
 

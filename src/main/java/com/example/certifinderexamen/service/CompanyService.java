@@ -4,8 +4,9 @@ import com.example.certifinderexamen.exception.BadRequestException;
 import com.example.certifinderexamen.model.Authority;
 import com.example.certifinderexamen.model.Company;
 import com.example.certifinderexamen.repository.CompanyRepository;
+import com.example.certifinderexamen.util.CustomPasswordEncoder;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,8 +17,9 @@ public class CompanyService  {
 
 
     private final CompanyRepository companyRepository;
-    private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CustomPasswordEncoder customPasswordEncoder;
 
     public Company getCompanyByUserName(String username){
         return companyRepository.findCompanyByUsername(username);
@@ -39,7 +41,8 @@ public class CompanyService  {
         List<Authority> authorityList = new ArrayList<>();
         authorityList.add(createAuthority("Company", "Company role"));
         company.setAuthorities(authorityList);
-        company.setPassword(passwordEncoder.encode(company.getPassword()));
+        String encodedPassword = customPasswordEncoder.getPasswordEncoder().encode(company.getPassword());
+        company.setPassword(encodedPassword);
         companyRepository.save(company);
     }
 
