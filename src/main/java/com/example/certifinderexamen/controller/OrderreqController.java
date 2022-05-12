@@ -23,14 +23,14 @@ public class OrderreqController {
     }
 
 
-    @GetMapping("/company/{companyname}")
-    public List<Orderreq> getCompanyOrders(@PathVariable("companyname") String companyname){
-        return orderreqService.getCompanyOrders(companyname);
+    @GetMapping("/company/{id}")
+    public List<Orderreq> getCompanyOrders(@PathVariable("id") Long id){
+        return orderreqService.getCompanyOrders(id);
     }
 
-    @GetMapping("/user/{username}")
-    public List<Orderreq> getUsersOrders(@PathVariable("username") String username){
-        return orderreqService.getUsersOrders(username);
+    @GetMapping("/user/{id}")
+    public List<Orderreq> getUsersOrders(@PathVariable("id") Long id){
+        return orderreqService.getUsersOrders(id);
     }
 
     @PostMapping("/addorder/user/{certuserId}/company/{companyId}")

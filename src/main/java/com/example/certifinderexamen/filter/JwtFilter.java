@@ -28,8 +28,7 @@ import java.util.Optional;
 public class JwtFilter extends OncePerRequestFilter {
 
 
-    @Autowired
-    private CertuserRepository certuserRepository;
+   
     @Autowired
     private CompanyRepository companyRepository;
     @Autowired

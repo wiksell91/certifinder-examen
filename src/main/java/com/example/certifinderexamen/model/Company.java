@@ -37,7 +37,6 @@ public class Company implements UserDetails {
             orphanRemoval = true)
     private List<Orderreq> orderreqs = new ArrayList<>();
 
-
     private String fullName;
     private String username;
     private String password;
@@ -48,8 +47,8 @@ public class Company implements UserDetails {
     @JoinTable(name = "AUTH_USER_AUTHORITY", joinColumns = @JoinColumn(referencedColumnName = "id"),inverseJoinColumns = @JoinColumn(referencedColumnName ="id"))
     private List<Authority> authorities;
 
-    public Company(Certuser certuser, Optional<Object> empty) {
-    }
+//    public Company(Certuser certuser, Optional<Object> empty) {
+//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

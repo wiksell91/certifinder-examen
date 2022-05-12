@@ -28,18 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }else {
             return companyOpt.get();
         }
-//        Optional<Company> CompanyOpt = companyRepository.findByUsername(username);
-//        if (CompanyOpt.isEmpty()) {
-//            // user exists in Proffesso but not here, this means we'll need to create an account
-//            //  for this user in this app
-//            Company company = new Company(certuserOpt.get(), Optional.empty());
-//            company = companyRepository.save(company);
-//            return company;
-//        } else {
-//            // TODO: Check that proffesso user and this app's user are in sync.
-//            return CompanyOpt.get();
-//        }
-//
-//    }    }
+
     }
 }

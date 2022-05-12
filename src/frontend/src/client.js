@@ -19,12 +19,23 @@ export const getAllCert = () =>
     fetch("api/v1/certstatus")
         .then(checkStatus)
 
+
+export const getCompanyOrders = companyId =>
+    fetch(`/api/v1/orderreq/company/${companyId}`)
+        .then(checkStatus)
+
+
+export const getUserOrders = (certuserId) =>
+    fetch(`/api/v1/orderreq/user/${certuserId}`)
+        .then(checkStatus)
+
+
 export const getAllOrders = () =>
     fetch("/api/v1/orderreq")
         .then(checkStatus)
 
 export const addNewOrder = (certuserId,companyId, orderreq) =>
-    fetch(`/api/v1/orderreq/addorder/user/${certuserId}/company/1`,{
+    fetch(`/api/v1/orderreq/addorder/user/${certuserId}/company/${companyId}`,{
         headers: {
             'Content-Type': 'application/json'
         },

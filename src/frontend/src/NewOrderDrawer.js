@@ -11,14 +11,14 @@ const {Option} = Select;
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus}) {
+function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus, companyId}) {
     const onCLose = () => setShowDrawer(false);
     const [submitting, setSubmitting] = useState(false);
 
 
     const onFinish = orderreq => {
         setSubmitting(true)
-        addNewOrder(certuserId, orderreq)
+        addNewOrder(certuserId, orderreq, companyId)
             .then(() => {
                 onCLose();
                 successNotification(

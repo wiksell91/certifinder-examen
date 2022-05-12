@@ -39,14 +39,13 @@ public class Certuser implements UserDetails {
     private String password;
     //@Column(nullable = false)
     private String fullName;
-    private Date createdAt;
-    private Date updatedAt;
-    private boolean enabled;
-
-
+    private boolean enabled = true;
     //@Column(nullable = false)
     private String city;
 
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JoinTable(name = "AUTH_USER_AUTHORITY", joinColumns = @JoinColumn(referencedColumnName = "id"),inverseJoinColumns = @JoinColumn(referencedColumnName ="id"))
+    private List<Authority> authorities;
 
 
     @OneToMany(mappedBy = "certuser",
@@ -63,7 +62,7 @@ public class Certuser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return authorities;
     }
 
     @Override
@@ -76,23 +75,27 @@ public class Certuser implements UserDetails {
         return this.password;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return this.enabled;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.enabled;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return this.enabled;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enabled;
     }
 }

@@ -37,14 +37,14 @@ public class OrderreqService {
 
     }
 
-    public List<Orderreq> getCompanyOrders(String username){
-        Optional<Company> comp = companyRepository.findByUsername(username);
+    public List<Orderreq> getCompanyOrders(Long id){
+        Optional<Company> comp = companyRepository.findById(id);
 
         return orderreqRepository.findOrderreqByCompany(comp.get());
     }
 
-    public List<Orderreq> getUsersOrders(String email){
-        Optional<Certuser> certuser = certuserRepository.findByUsername(email);
+    public List<Orderreq> getUsersOrders(Long id){
+        Optional<Certuser> certuser = certuserRepository.findById(id);
         return orderreqRepository.findOrderreqByCertuser(certuser.get());
     }
 

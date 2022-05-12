@@ -1,8 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from "react";
-import {getAllCert, getAllOrders} from "../client";
-import { useSelector } from "react-redux";
-import authToken from "../utils/authToken";
+import {getAllCert, getCompanyOrders} from "../client";
 import { useNavigate } from "react-router-dom";
 import ajax from "../Service/fetchService";
 import { useUser } from "../UserProvider";
@@ -62,7 +60,9 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
     const [certuserId, setCertuserId] = useState(null);
     const user = useUser();
     const [company, setCompany] = useState(null);
-        const navigate = useNavigate();
+    const navigate = useNavigate();
+    // const [companyId, setCompanyId] = useState({company && `${company.id}`});
+
 
         useEffect(() => {
             console.log("Value of user", user);
@@ -120,7 +120,6 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
     ];
 
 
-
     const fetchCertstatus = () =>
         getAllCert()
             .then(res => res.json())
@@ -156,6 +155,7 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
                 // fetchOrderreqs={fetchOrderreqs}
                 certuserId = {certuserId}
                 fetchCertstatus={fetchCertstatus}
+                companyId = {company.id}
 
             />
             <Table dataSource={certstatus}
@@ -170,7 +170,7 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
     }
 
     const fetchOrderreqs = () =>
-        getAllOrders()
+        getCompanyOrders(company.company.id)
             .then(res => res.json())
             .then(data => {
                 setOrderreqs(data);

@@ -22,8 +22,6 @@ public class Certificate {
             generator = "certificate_sequence"
     )
     private Long id;
-
-
     private String certType;
 
     @Enumerated(EnumType.STRING)
