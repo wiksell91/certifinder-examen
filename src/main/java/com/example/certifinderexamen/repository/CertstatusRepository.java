@@ -11,9 +11,9 @@ import java.util.List;
 @Repository
 public interface CertstatusRepository extends JpaRepository<Certstatus, Long> {
 
-    List<Certstatus> findCertificatestatusByCertificate(Certificate certificate);
+    List<Certstatus> findCertstatuByCertificate(Certificate certificate);
 
-    List<Certstatus> findCertificatestatusByCertuser(Certuser certuser);
+    List<Certstatus> findCertstatusByCertuser(Certuser certuser);
 
 
 

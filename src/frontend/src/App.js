@@ -1,43 +1,46 @@
-import React from 'react';
+import React,{ useState, useEffect } from 'react';
 import jwt_decode from "jwt-decode";
 import {
-  BrowserRouter as Router,
     Routes,
         Route
 } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import Mainpage from "./pages/Mainpage";
 import Cpage  from "./pages/Cpage";
+import UserPage from "./pages/UserPage";
 import LoginPage from "./pages/LoginPage";
 import { useUser } from "./UserProvider";
 
 
 function App() {
+    const [roles, setRoles] = useState([]);
+    const user = useUser();
 
-    // const [roles, setRoles] = useState([]);
-    // const user = useUser();
+    useEffect(() => {
+        setRoles(getRolesFromJWT());
+    }, [user.jwt]);
 
-    // useEffect(() => {
-    //     setRoles(getRolesFromJWT());
-    // }, [user.jwt]);
-
-    // function getRolesFromJWT() {
-    //     if (user.jwt) {
-    //         const decodedJwt = jwt_decode(user.jwt);
-    //         return decodedJwt.authorities;
-    //     }
-    //     return [];
-    // }
+    function getRolesFromJWT() {
+        if (user.jwt) {
+            const decodedJwt = jwt_decode(user.jwt);
+            return decodedJwt.authorities;
+        }
+        return [];
+    }
 
   return (
       <Routes>
           <Route
               path="/cpage"
-              element={
+              element={roles.find((role) => role  === "ROLE_COMPANY") ?(
                       <PrivateRoute>
                           <Cpage />
                       </PrivateRoute>
-
+              ) : (
+                  <PrivateRoute>
+                      <UserPage />
+                  </PrivateRoute>
+              )
               }
           />
           <Route path="/" element={<Mainpage />} />

@@ -3,7 +3,7 @@ import {Drawer, Input, Col, Select, Form, Row, Button, Spin} from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import {LoadingOutlined} from "@ant-design/icons";
 import {useState} from 'react';
-import {addNewOrder} from "./client";
+import {updateOrderStatus} from "./client";
 
 import {successNotification, errorNotification} from "./Notification";
 
@@ -11,21 +11,21 @@ const {Option} = Select;
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus, companyId, certStatusId}) {
-    const onCLose = () => setShowDrawer(false);
-    const [submitting, setSubmitting] = useState(false);
+function UpdateOrderDrawer({showOrderDrawer, setShowOrderDrawer, orderreqId, fetchOrderreq}) {
 
+    const onCLose = () => setShowOrderDrawer(false);
+
+    const [submitting, setSubmitting] = useState(false);
 
     const onFinish = orderreq => {
         setSubmitting(true)
-        addNewOrder(certuserId, companyId,certStatusId, orderreq)
+        updateOrderStatus(orderreqId, orderreq)
             .then(() => {
                 onCLose();
                 successNotification(
-                    "Förfrågan skickad"
+                    "Tack gör att du svarade"
                 )
-                //fetchOrderreqs();
-                fetchCertstatus();
+                fetchOrderreq();
             }).catch(err => {
             err.response.json().then(res => {
                 console.log(err);
@@ -50,7 +50,7 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
         title="Skapa ny förfrågan"
         width={720}
         onClose={onCLose}
-        visible={showDrawer}
+        visible={showOrderDrawer}
         bodyStyle={{paddingBottom: 80}}
         footer={
             <div
@@ -76,20 +76,8 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
                     >
                         <Select>
                             <Option value="OBESVARAD">Obesvarad</Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-                <Col span={8}>
-                    <Form.Item
-                        name="ordertype"
-                        label="Ordertyp"
-                        rules={[{required: true, message: 'Vänligen välj ordertyp'}]}
-                    >
-                        <Select placeholder="Vänligen välj ordertyp">
-                            <Option value="tungalyft">Tungalyft</Option>
-                            <Option value="Lastbil">Lastbil</Option>
-                            <Option value="Truck">Truck</Option>
-                            <Option value="Hetarbete">Hetarbete</Option>
+                            <Option value="GODKÄND">Ja</Option>
+                            <Option value="NEKAD">Nej</Option>
                         </Select>
                     </Form.Item>
                 </Col>
@@ -97,25 +85,16 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
             <Col span={12}>
                 <Form.Item
                     name="comment"
-                    label="Arbetsbeskrivning"
-                    rules={[{required: true, message: 'Vänligen beskriv arbetet'}]}
+                    label="Kommentar"
                 >
-                    <TextArea placeholder="Vänligen beskriv arbetet"/>
-                </Form.Item>
-            </Col>
-            <Col span={12}>
-                <Form.Item
-                    name="orderdate"
-                    label="Orderdatum"
-                >
-                    <Input placeholder="Ange datum för arbete"/>
+                    <TextArea placeholder="Några övriga frågor?"/>
                 </Form.Item>
             </Col>
             <Row>
                 <Col span={12}>
                     <Form.Item >
                         <Button type="primary" htmlType="submit">
-                            Submit
+                            Svara
                         </Button>
                     </Form.Item>
                 </Col>
@@ -127,4 +106,4 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
     </Drawer>
 }
 
-export default NewOrderDrawer;
+export default UpdateOrderDrawer;

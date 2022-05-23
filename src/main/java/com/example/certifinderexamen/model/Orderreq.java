@@ -1,5 +1,6 @@
 package com.example.certifinderexamen.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,13 +28,17 @@ public class Orderreq {
     )
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "certuser_id")
-    public Certuser certuser;
 
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "person_id")
+    public Certuser person;
+
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER )
     @JoinColumn(name = "company_id")
-    public Company company;
+    public Certuser company;
+
     private Orderstatus orderstatus;
     private String ordertype;
     private String comment;

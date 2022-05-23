@@ -1,14 +1,17 @@
 import React from 'react';
 import {useState, useEffect} from "react";
-import {getAllCert, getCompanyOrders} from "../client";
+import {getAllCert, getCompanyOrders, getUserByUserName, updateUser, deleteUser} from "../client";
 import { useNavigate } from "react-router-dom";
 import ajax from "../Service/fetchService";
 import { useUser } from "../UserProvider";
-import {Empty, Layout, Menu, Radio, Spin, Table, Button} from "antd";
+import {Empty, Layout, Menu, Radio, Spin, Table, Button, Form, Input, Row, Popconfirm} from "antd";
 import NewOrderDrawer from "../NewOrderDrawer";
 import {ContactsOutlined, LoadingOutlined, MailOutlined, UploadOutlined, UserOutlined} from "@ant-design/icons";
 import '../App.css';
 import {errorNotification, successNotification} from "../Notification";
+import jwt_decode from "jwt-decode";
+import fetch from "unfetch";
+
 
 
 const {Header, Content, Footer, Sider} = Layout;
@@ -16,58 +19,38 @@ const {Header, Content, Footer, Sider} = Layout;
 
 
 
-const orders =  [
-    {
-        title: 'Namn',
-        dataIndex: ['certuser', 'fullName'],
-        key: 'fullName',
-    },
-    {
-        title: 'Behörighetstyp',
-        dataIndex: 'ordertype',
-        key: 'ordertype',
-    },
-    {
-        title: 'Kommentar',
-        dataIndex:  'comment',
-        key: 'comment',
-    },
-    {
-        title: 'Arbetsdatum',
-        dataIndex:  'orderdate',
-        key: 'orderdate',
-    },
-    {
-        title: 'Företag',
-        dataIndex: ['company', 'fullName'],
-        key: 'fullName',
-    },
-    {
-        title: 'Orderstatus',
-        dataIndex: 'status',
-        key: 'status'
-    },
-];
+
 
 
 const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
 
-    function Cpage ()  {
-     const [certstatus, setCertstatus] = useState([]);
+function Cpage ()  {
+    const [fetching, setFetching] = useState(false);
+    const [username, setUsername] = useState(null);
+    const [certstatus, setCertstatus] = useState([]);
     const [orderreqs, setOrderreqs] = useState([]);
-    const [fetching, setFetching] = useState(true);
     const [showDrawer, setShowDrawer] = useState(false);
     const [certuserId, setCertuserId] = useState(null);
     const user = useUser();
     const [company, setCompany] = useState(null);
     const navigate = useNavigate();
-    // const [companyId, setCompanyId] = useState({company && `${company.id}`});
+    const [companyId, setCompanyId] =useState(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [userInfos, setUserIfos] = useState([]);
+    const [certStatusId, setCertStatusId] = useState(null);
+
+
+
 
 
         useEffect(() => {
             console.log("Value of user", user);
             ajax("api/auth/userinfo", "GET", user.jwt).then((companyData) => {
                 setCompany(companyData);
+                setCompanyId(companyData.id);
+                setUsername(companyData.username);
+                console.log(companyData.username);
+
             });
             if (!user.jwt) {
                 console.warn("No valid jwt found, redirecting to login page");
@@ -75,49 +58,75 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
             }
         }, [user.jwt]);
 
+        //
+        // useEffect(() => {
+        //     fetch(`/api/v1/orderreq/company/${companyId}`)
+        //         .then((orderreqData) => {
+        //             setOrderreqs(orderreqData);
+        //         });
+        // }, []);
+
+
+
         const logOut = () =>{
+            user.setJwt(null);
             localStorage.clear();
                 navigate('/');
         }
 
 
-    const users  =  [
-        {
-            title: 'Namn',
-            dataIndex: ['certuser', 'fullName'],
-            key: 'name',
-        },
-        {
-            title: 'Stad',
-            dataIndex: ['certuser', 'city'],
-            key: 'city',
-        },
+    const removeUser = (username) => {
+        deleteUser(username).then(() => {
+            navigate('/');
+        }).catch(err => {
+            err.response.json().then(res => {
+                console.log(res);
+                errorNotification(
+                    "There was an issue",
+                    `${res.message} [${res.status}] [${res.error}]`
+                )
+            });
+        })
+    }
 
-        {
-            title: 'Behörighet',
-            dataIndex: ['certificate', 'certType'],
-            key: 'cert_type',
-        },
-        {
-            title: 'Giltig t.o.m',
-            dataIndex: 'validto',
-            key: 'validto',
-        },
+        const users  =  [
+            {
+                title: 'Namn',
+                dataIndex: ['certuser', 'fullName'],
+                key: 'fullName',
+            },
+            {
+                title: 'Stad',
+                dataIndex: ['certuser', 'city'],
+                key: 'city',
+            },
 
-        {
-            title: 'Boka',
-            key: 'action',
-            render: (text, certstatus) =>
-                <Radio.Group>
-                    <Radio.Button  value="small"onClick={() => {
-                        setCertuserId(certstatus.certuser.id)
-                        setShowDrawer(!showDrawer)}}
-                    >Book</Radio.Button>
+            {
+                title: 'Behörighet',
+                dataIndex: ['certificate', 'certType'],
+                key: 'cert_type',
+            },
+            {
+                title: 'Giltig t.o.m',
+                dataIndex: 'validto',
+                key: 'validto',
+            },
 
-                </Radio.Group>
+            {
+                title: 'Boka',
+                key: 'action',
+                render: (text, certstatus) =>
+                    <Radio.Group>
+                        <Radio.Button  value="small"onClick={() => {
+                            setCertuserId(certstatus.certuser.id)
+                            setCertStatusId(certstatus.id)
+                            setShowDrawer(!showDrawer)}}
+                        >Boka</Radio.Button>
+                    </Radio.Group>
 
-        }
-    ];
+            }
+        ];
+
 
 
     const fetchCertstatus = () =>
@@ -154,8 +163,9 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
                 setShowDrawer={setShowDrawer}
                 // fetchOrderreqs={fetchOrderreqs}
                 certuserId = {certuserId}
+                companyId={companyId}
+                certStatusId={certStatusId}
                 fetchCertstatus={fetchCertstatus}
-                companyId = {company.id}
 
             />
             <Table dataSource={certstatus}
@@ -164,13 +174,45 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
                    title={() => 'Våra Certifinders'}
                    pagination={{pageSize: 15}}
                 //scroll={{y:250}}
-                   rowKey={(certstatus) => certstatus.certuser.id}
+                  rowKey={(certstatus) => certstatus.certuser.id}
             />
         </>
     }
+        const orders =  [
+            {
+                title: 'Namn',
+                dataIndex: ['person', 'fullName'],
+                key: 'FullName',
+            },
+            {
+                title: 'Behörighetstyp',
+                dataIndex: 'ordertype',
+                key: 'ordertype',
+            },
+            {
+                title: 'Kommentar',
+                dataIndex:  'comment',
+                key: 'comment',
+            },
+            {
+                title: 'Arbetsdatum',
+                dataIndex:  'orderdate',
+                key: 'orderdate',
+            },
+            {
+                title: 'Företag',
+                dataIndex: ['company', 'fullName'],
+                key: 'FullName',
+            },
+            {
+                title: 'status',
+                dataIndex: 'orderstatus',
+                key: 'orderstatus'
+            },
+        ];
 
-    const fetchOrderreqs = () =>
-        getCompanyOrders(company.company.id)
+        const fetchOrderreqs = () =>
+        getCompanyOrders([username])
             .then(res => res.json())
             .then(data => {
                 setOrderreqs(data);
@@ -185,27 +227,104 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
             });
         }).finally(() => setFetching(false))
 
+        useEffect(() => {
+            fetchOrderreqs();
+        }, [username]);
+
+
+        const renderOrderreqs = () => {
+            if(fetching) {
+                return <Spin indicator={antIcon}/>
+            }
+            if (orderreqs.length <= 0) {
+                return <Empty />;
+            }
+            return <Table dataSource={orderreqs}
+                          columns={orders}
+                          bordered
+                          title={() => 'Arbetsförfrågningar'}
+                          pagination={{pageSize: 15}}
+                //scroll={{y:250}}
+                          rowKey={(orderreqs) => orderreqs.id}
+            />;
+
+        }
+    const fetchUsers = () =>
+        getUserByUserName([username])
+            .then(res => res.json())
+            .then(data => {
+                setUserIfos(data);
+            }).catch(err => {
+            console.log(err.response)
+            err.response.json().then(res => {
+                console.log(res);
+                errorNotification(
+                    "There was an issue",
+                    `${res.message} [${res.status}] [${res.error}]`
+                )
+            });
+        }).finally(() => setFetching(false))
+
     useEffect(() => {
-        fetchOrderreqs();
-    }, []);
+        fetchUsers();
+    },[username] );
 
-    const renderOrderreqs = () => {
-        if(fetching) {
-            return <Spin indicator={antIcon}/>
-        }
-        if (orderreqs.length <= 0) {
-            return <Empty />;
-        }
-        return <Table dataSource={orderreqs}
-                      columns={orders}
-                      bordered
-                      title={() => 'Arbetsförfrågningar'}
-                      pagination={{pageSize: 15}}
-            //scroll={{y:250}}
-                      rowKey={(orderreqs) => orderreqs.id}
-        />;
+    const updateComp = () => {
+        fetchUsers();
+        const onFinish = user => {
+            setSubmitting(true)
+            updateUser([username], user)
+                .then(() =>{
+                    successNotification(
+                        "Snyggt! Nu är dina upgifter ändrade"
+                    )
+                }).catch(err => {
+                err.response.json().then(res => {
+                    errorNotification(
+                        "Nu vart det lite struligt..",
+                        `${res.message} [${res.status}] [${res.error}]`,
+                        "bottomLeft"
+                    )
+                });
+            }).finally(() => {
+                fetchUsers();
+                setSubmitting(false);
+            })
+        };
 
+        return (
+            <Form name="nest-messages" onFinish={onFinish} >
+                <Form.Item name="fullName" label="Företagsnamn" rules={[{ required: false }]}>
+                    <Input placeholder={userInfos.fullName} />
+                </Form.Item>
+                <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
+                    <Input placeholder={userInfos.username} />
+                </Form.Item>
+                <Form.Item name= "city" label="Stad" rules={[{ required: false }]}>
+                    <Input placeholder= {userInfos.city} />
+                </Form.Item>
+                <Form.Item >
+                    <Button type="primary" htmlType="submit">
+                        Ändra
+                    </Button>
+                </Form.Item>
+                <Form.Item>
+                <Popconfirm
+                    placement='topRight'
+                    title={`Vill du verkligen radera ${username}`}
+                    onConfirm={() => removeUser(username)}
+                    okText='Ja'
+                    cancelText='Nej'>
+                    <Button value="small">Radera</Button>
+                </Popconfirm>
+                </Form.Item>
+                <Row>
+                    {submitting && <Spin indicator={antIcon} />}
+                </Row>
+            </Form>
+        );
     }
+
 
 
     const [selectedMenuItem, setSelectedMenuItem] = useState("1")
@@ -214,9 +333,9 @@ const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
             case "1":
                 return renderCertstatus();
             case "2":
-                return  renderOrderreqs();
+                return renderOrderreqs();
             case "3":
-                return <h4>Hello {company && `${company.id} ${company.fullName}`}</h4>;
+                return updateComp();
             case "4":
                 return ;
             default:

@@ -1,39 +1,56 @@
 package com.example.certifinderexamen.controller;
 
+import com.example.certifinderexamen.exception.ResourceNotFoundException;
 import com.example.certifinderexamen.model.Certuser;
 import com.example.certifinderexamen.service.CertuserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/account")
 @RestController
-@RequestMapping(path = "/api/v1/certuser")
 public class CertuserController {
 
     private final CertuserService certuserService;
 
 
-    @GetMapping("/all")
-    public List<Certuser> getAllCertuser(){
-        return certuserService.getAllCertuser();
+    @GetMapping
+    public List<Certuser> getAllAccounts(){
+        return certuserService.getAllUsers();
+    }
+
+    @GetMapping("/{username}")
+    public Certuser getUserByUserName(@PathVariable("username") String username){
+        return certuserService.getUserByUserName(username);
+    }
+
+    @PostMapping("/company")
+    public void addCompany(@RequestBody Certuser certuser){
+        certuserService.addCompany(certuser);
+    }
+
+    @PostMapping("/user")
+    public void addUser(@RequestBody Certuser certuser){
+        certuserService.addUser(certuser);
+    }
+
+    @PatchMapping("/update/{username}")
+    public Certuser updateUser(@PathVariable String username, @RequestBody Map<String, Object> fields) throws ResourceNotFoundException, ParseException {
+        Certuser certuser = certuserService.getUserByUserName(username);
+        return certuserService.updateUser(certuser, fields);
     }
 
 
-    @PostMapping("/add")
-    public ResponseEntity<Certuser> addCertuser(@RequestBody Certuser certuser){
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/certuser/add").toUriString());
-        return ResponseEntity.created(uri).body(certuserService.addCertuser(certuser));
+    @DeleteMapping("/delete/{username}")
+    public void deleteUser(@PathVariable ("username") String username){
+        certuserService.deleteUser(username);
     }
 
 
-
-    @DeleteMapping(path = "/{certuserId}")
-    public void deleteCertuser(@PathVariable("certuserId") Long certuserId){
-        certuserService.deleteCertuser(certuserId);
-    }
 }

@@ -22,12 +22,13 @@ public class CertService {
 
 
 
+
     public List<Certstatus> getAllCertstatus(){
         return certstatusRepository.findAll();
     }
 
-    public void addCertstatus(Certstatus certstatus, Long certuserId, Long certificateId){
-        Certuser certuser = certuserRepository.findById(certuserId).get();
+    public void addCertstatus(Certstatus certstatus, String username, Long certificateId){
+        Certuser certuser = certuserRepository.findByUsername(username).get();
         certstatus.setCertuser(certuser);
         Certificate certificate = certificateRepository.findById(certificateId).get();
         certstatus.setCertificate(certificate);
@@ -39,17 +40,19 @@ public class CertService {
     public List<Certstatus> getCert(String certType){
         Optional<Certificate> cert = certificateRepository.findCertByType(certType);
 
-        return certstatusRepository.findCertificatestatusByCertificate(cert.get());
+        return certstatusRepository.findCertstatuByCertificate(cert.get());
 
     }
 
 
-    public List<Certstatus> getUsersCert(String email){
-        Optional<Certuser> certuser = certuserRepository.findByUsername(email);
+    public List<Certstatus> getUsersCert(Long userId){
+        Optional<Certuser> user = certuserRepository.findById(userId);
 
-        return certstatusRepository.findCertificatestatusByCertuser(certuser.get());
+        return certstatusRepository.findCertstatusByCertuser(user.get());
 
     }
+
+
 
 
 

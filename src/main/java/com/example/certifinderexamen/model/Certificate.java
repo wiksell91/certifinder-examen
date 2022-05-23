@@ -1,5 +1,6 @@
 package com.example.certifinderexamen.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -27,11 +28,12 @@ public class Certificate {
     @Enumerated(EnumType.STRING)
     private Bransch bransch;
 
+    @JsonIgnore
     @OneToMany(
             mappedBy = "certificate",
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,fetch = FetchType.LAZY,
             orphanRemoval = true)
-    private List<Certstatus> certificatestats = new ArrayList<>();
+    private List<Certstatus> certstats = new ArrayList<>();
 
 
     public Certificate() {
@@ -67,6 +69,6 @@ public class Certificate {
     }
 
     public void setCertificatestats(List<Certstatus> certificatestats) {
-        this.certificatestats = certificatestats;
+        this.certstats = certstats;
     }
 }

@@ -3,7 +3,7 @@ import {Drawer, Input, Col, Select, Form, Row, Button, Spin} from 'antd';
 import TextArea from "antd/es/input/TextArea";
 import {LoadingOutlined} from "@ant-design/icons";
 import {useState} from 'react';
-import {addNewOrder} from "./client";
+import {addNewCert} from "./client";
 
 import {successNotification, errorNotification} from "./Notification";
 
@@ -11,21 +11,21 @@ const {Option} = Select;
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus, companyId, certStatusId}) {
-    const onCLose = () => setShowDrawer(false);
+function CertificateDrawer({showCertDrawer, setShowCertDrawer, username,certificateId, fetchCertificate}) {
+
+    const onCLose = () => setShowCertDrawer(false);
     const [submitting, setSubmitting] = useState(false);
 
 
-    const onFinish = orderreq => {
+    const onFinish = certstatus => {
         setSubmitting(true)
-        addNewOrder(certuserId, companyId,certStatusId, orderreq)
+        addNewCert(username, certificateId,certstatus)
             .then(() => {
                 onCLose();
                 successNotification(
-                    "Förfrågan skickad"
+                    "Behörighet tillagd"
                 )
-                //fetchOrderreqs();
-                fetchCertstatus();
+                fetchCertificate();
             }).catch(err => {
             err.response.json().then(res => {
                 console.log(err);
@@ -50,7 +50,7 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
         title="Skapa ny förfrågan"
         width={720}
         onClose={onCLose}
-        visible={showDrawer}
+        visible={showCertDrawer}
         bodyStyle={{paddingBottom: 80}}
         footer={
             <div
@@ -71,44 +71,29 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
             <Row gutter={12}>
                 <Col span={8}>
                     <Form.Item
-                        name="orderstatus"
-                        label="status"
+                        name="validto"
+                        label="Giltig till"
+                        rules={[{required: true, message: 'Vänligen ange datum'}]}
                     >
-                        <Select>
-                            <Option value="OBESVARAD">Obesvarad</Option>
-                        </Select>
+                        <TextArea placeholder="Vänligen ange datum"/>
                     </Form.Item>
                 </Col>
                 <Col span={8}>
                     <Form.Item
-                        name="ordertype"
-                        label="Ordertyp"
-                        rules={[{required: true, message: 'Vänligen välj ordertyp'}]}
+                        name="regnumber"
+                        label="ID nummen"
+                        rules={[{required: true, message: 'Vänligen ange ID nummer'}]}
                     >
-                        <Select placeholder="Vänligen välj ordertyp">
-                            <Option value="tungalyft">Tungalyft</Option>
-                            <Option value="Lastbil">Lastbil</Option>
-                            <Option value="Truck">Truck</Option>
-                            <Option value="Hetarbete">Hetarbete</Option>
-                        </Select>
+                        <TextArea placeholder="Vänligen ange ID numme"/>
                     </Form.Item>
                 </Col>
             </Row>
             <Col span={12}>
                 <Form.Item
-                    name="comment"
-                    label="Arbetsbeskrivning"
-                    rules={[{required: true, message: 'Vänligen beskriv arbetet'}]}
+                    name="generalinfo"
+                    label="Övrig info"
                 >
-                    <TextArea placeholder="Vänligen beskriv arbetet"/>
-                </Form.Item>
-            </Col>
-            <Col span={12}>
-                <Form.Item
-                    name="orderdate"
-                    label="Orderdatum"
-                >
-                    <Input placeholder="Ange datum för arbete"/>
+                    <TextArea placeholder="Övrig info - Frivilligt"/>
                 </Form.Item>
             </Col>
             <Row>
@@ -127,4 +112,4 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
     </Drawer>
 }
 
-export default NewOrderDrawer;
+export default CertificateDrawer;

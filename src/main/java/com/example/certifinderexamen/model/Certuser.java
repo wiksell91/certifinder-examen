@@ -1,25 +1,22 @@
 package com.example.certifinderexamen.model;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-@AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
-@ToString
 @Entity
-@Table
 public class Certuser implements UserDetails {
-
     @Id
     @SequenceGenerator(
             name = "user_sequence",
@@ -31,48 +28,54 @@ public class Certuser implements UserDetails {
             strategy = GenerationType.SEQUENCE,
             generator = "user_sequence"
     )
-
     private Long id;
-    @Column(nullable = false, unique = true)
-    private String username;
-    @Column(nullable = false)
-    private String password;
-    //@Column(nullable = false)
-    private String fullName;
-    private boolean enabled = true;
-    //@Column(nullable = false)
-    private String city;
 
-    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JoinTable(name = "AUTH_USER_AUTHORITY", joinColumns = @JoinColumn(referencedColumnName = "id"),inverseJoinColumns = @JoinColumn(referencedColumnName ="id"))
-    private List<Authority> authorities;
+//    @OneToMany(mappedBy = "certuser",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    private List<Orderreq> orderreqs = new ArrayList<>();
 
 
+
+//    @OneToMany(mappedBy = "company",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    private List<Orderreq> companyorderreqs = new ArrayList<>();
+//
+//
+    @JsonIgnore
     @OneToMany(mappedBy = "certuser",
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,fetch = FetchType.LAZY,
             orphanRemoval = true)
     private List<Certstatus> certstatuses = new ArrayList<>();
 
+    private String fullName;
+    private String username;
+    private String password;
+    private String city;
+    private Boolean enabled = true;
 
-    @OneToMany(mappedBy = "certuser",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private List<Orderreq> orderreqs = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "certuser", cascade = CascadeType.ALL)
+    private Set<Authorities> authorities = new HashSet<>();
 
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Set<Authorities> getAuthorities() {
         return authorities;
     }
 
-    @Override
-    public String getUsername() {
-        return this.username;
+    public void setAuthorities(Set<Authorities> authorities) {
+        this.authorities = authorities;
     }
 
     @Override
     public String getPassword() {
-        return this.password;
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
     }
 
     public String getFullName() {

@@ -3,11 +3,11 @@ package com.example.certifinderexamen.controller;
 
 import ch.qos.logback.core.util.Duration;
 import com.example.certifinderexamen.controller.dto.AuthCredentialsRequest;
-import com.example.certifinderexamen.model.Company;
+import com.example.certifinderexamen.model.Certuser;
+import com.example.certifinderexamen.repository.CertuserRepository;
 import com.example.certifinderexamen.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -27,6 +27,9 @@ import java.security.Principal;
 public class AuthController {
 
     @Autowired
+    private CertuserRepository certuserRepository;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
@@ -38,8 +41,12 @@ public class AuthController {
 //    @Value("${cookies.protocol")
 //    private String protocol;
 
-    @PostMapping("/companylogin")
-    public ResponseEntity<?> companyLogin(@RequestBody AuthCredentialsRequest request){
+    @PostMapping("/login")
+    public ResponseEntity<?> Login(@RequestBody AuthCredentialsRequest request){
+
+        Certuser user = certuserRepository.findCertuserByUsername(request.getUsername());
+
+
 
         try {
             Authentication authenticate = authenticationManager
@@ -47,10 +54,11 @@ public class AuthController {
                             new UsernamePasswordAuthenticationToken(
                                     request.getUsername(), request.getPassword()));
 
-            Company company = (Company) authenticate.getPrincipal();
-            company.setPassword(null);
+            Certuser certuser = (Certuser) authenticate.getPrincipal();
+            certuser.setPassword(null);
 
-            String token = jwtUtil.generateToken(company);
+
+            String token = jwtUtil.generateToken(certuser);
             ResponseCookie cookie = ResponseCookie.from("jwt", token)
 //                    .domain(domain)
 //                    .httpOnly(true)
@@ -69,9 +77,9 @@ public class AuthController {
     }
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken(@CookieValue(name = "jwt") String token,
-                                           @AuthenticationPrincipal Company company) {
+                                           @AuthenticationPrincipal Certuser certuser) {
         try {
-            Boolean isValidToken = jwtUtil.validateToken(token, company);
+            Boolean isValidToken = jwtUtil.validateToken(token, certuser);
             return ResponseEntity.ok(isValidToken);
         } catch (ExpiredJwtException e) {
             return ResponseEntity.ok(false);
@@ -81,10 +89,11 @@ public class AuthController {
     @GetMapping("/userinfo")
     public ResponseEntity<?> getUserInfo(Principal user){
 
-        Company userObj=(Company) userDetailsService.loadUserByUsername(user.getName());
+        Certuser certuserObj =(Certuser) userDetailsService.loadUserByUsername(user.getName());
         AuthCredentialsRequest userInfo=new AuthCredentialsRequest();
-        userInfo.setId(userObj.getId());
-        userInfo.setFullName(userObj.getFullName());
+        userInfo.setId(certuserObj.getId());
+        userInfo.setUsername(certuserObj.getUsername());
+        userInfo.setFullName(certuserObj.getFullName());
 
 
         return ResponseEntity.ok(userInfo);

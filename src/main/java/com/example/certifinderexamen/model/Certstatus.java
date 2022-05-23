@@ -1,5 +1,6 @@
 package com.example.certifinderexamen.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,11 +27,12 @@ public class Certstatus {
     )
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER )
     @JoinColumn(name = "certuser_id")
     public Certuser certuser;
 
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "certificate_id")
     public Certificate certificate;
 

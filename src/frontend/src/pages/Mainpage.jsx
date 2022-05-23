@@ -5,7 +5,7 @@ import React, {useState} from 'react';
 //import { authenticate, authFailure, authSuccess } from '../redux/authActions';
 //import { connect } from 'react-redux';
 //import {userLogin} from "../api/authenticationService";
-import {addNewCompany} from "../client";
+import {addNewCompany, addNewUser} from "../client";
 import '../App.css';
 import {errorNotification, successNotification} from "../Notification";
 import { UserOutlined, LockOutlined, LoadingOutlined } from '@ant-design/icons';
@@ -26,7 +26,7 @@ function Mainpage  () {
     const [password, setPassword] = useState("");
     const [errorMsg, setErrorMsg] = useState(null);
 
-    const loginCompany = () => {
+    const login = () => {
 
 
     function sendLoginRequest() {
@@ -36,7 +36,7 @@ function Mainpage  () {
             password: password,
         };
 
-        fetch("api/auth/companylogin", {
+        fetch("api/auth/login", {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -49,7 +49,7 @@ function Mainpage  () {
                     setErrorMsg("Invalid username or password");
                 } else {
                     setErrorMsg(
-                        "Something went wrong, try again later or reach out to trevor@coderscampus.com"
+                        "Nu blev något fel"
                     );
                 }
             })
@@ -115,9 +115,9 @@ function Mainpage  () {
 
 
     const addCompany = () => {
-        const onFinish = company => {
+        const onFinish = user => {
             setSubmitting(true)
-            addNewCompany(company)
+            addNewCompany(user)
                 .then(() =>{
                     successNotification(
                         "Snyggt! Nu är du en del av Certifinder"
@@ -143,7 +143,54 @@ function Mainpage  () {
                 <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name= "password" label="Lösenord" rules={[{ required: false }]}>
+                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item name= "city" label="Stad" rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item wrapperCol={{ ...listlayout.wrapperCol, offset: 8 }}>
+                    <Button type="primary" htmlType="submit">
+                        Submit
+                    </Button>
+                </Form.Item>
+                <Row>
+                    {submitting && <Spin indicator={antIcon} />}
+                </Row>
+            </Form>
+        );
+    }
+
+    const addUser = () => {
+        const onFinish = user => {
+            setSubmitting(true)
+            addNewUser(user)
+                .then(() =>{
+                    successNotification(
+                        "Snyggt! Nu är du en del av Certifinder"
+                    )
+                }).catch(err => {
+                err.response.json().then(res => {
+                    errorNotification(
+                        "Nu vart det lite struligt..",
+                        `${res.message} [${res.status}] [${res.error}]`,
+                        "bottomLeft"
+                    )
+                });
+            }).finally(() => {
+                setSubmitting(false);
+            })
+        };
+
+        return (
+            <Form {...listlayout} name="nest-messages" onFinish={onFinish} validateMessages={validateMessages}>
+                <Form.Item name="fullName" label="Namn" rules={[{ required: false }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: false }]}>
                     <Input />
                 </Form.Item>
                 <Form.Item name= "city" label="Stad" rules={[{ required: false }]}>
@@ -167,13 +214,13 @@ function Mainpage  () {
     const handleItemClick = (key) => {
         switch (key) {
             case "1":
-                return "skapa konto privat";
+                return login();
             case "2":
                 return  addCompany();
             case "3":
-                return "feeeeeeliyggi";
+                return addUser();
             case "4":
-                return loginCompany();
+                return login();
             default:
                 break;
 
@@ -194,16 +241,16 @@ function Mainpage  () {
             <Menu selectedKeys={selectedMenuItem} theme="dark" mode="inline" onClick={(e) =>
                 setSelectedMenuItem(e.key)}>
                 <Menu.Item key="1" >
-                    Nytt konto privat
+                    Logga in
                 </Menu.Item>
                 <Menu.Item key="2" >
                     Nytt konto företag
                 </Menu.Item>
                 <Menu.Item key="3" >
-                    Logga in privat
+                    Nytt konto privat
                 </Menu.Item>
                 <Menu.Item key="4" >
-                    Logga in företag
+                    Vänta
                 </Menu.Item>
             </Menu>
         </Sider>

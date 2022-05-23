@@ -1,12 +1,15 @@
 package com.example.certifinderexamen.controller;
 
+import com.example.certifinderexamen.exception.ResourceNotFoundException;
 import com.example.certifinderexamen.model.Orderreq;
 import com.example.certifinderexamen.service.OrderreqService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -18,23 +21,51 @@ public class OrderreqController {
 
 
     @GetMapping
-    public List<Orderreq> getAllOrderReqs(){
+    public List<Object> getAllOrderReqs(){
         return orderreqService.getAllOrderReqs();
     }
 
-
-    @GetMapping("/company/{id}")
-    public List<Orderreq> getCompanyOrders(@PathVariable("id") Long id){
-        return orderreqService.getCompanyOrders(id);
+    @GetMapping("/all")
+    public List<Orderreq> getAllOrderReq(){
+        return orderreqService.getAllOrderreq();
     }
 
-    @GetMapping("/user/{id}")
-    public List<Orderreq> getUsersOrders(@PathVariable("id") Long id){
-        return orderreqService.getUsersOrders(id);
+
+
+    @GetMapping("/user")
+    public List<Orderreq> getUserOrders(@RequestParam("username") String username){
+        return orderreqService.getUsersOrders(username);
     }
 
-    @PostMapping("/addorder/user/{certuserId}/company/{companyId}")
-    public void addOrderReqs(@RequestBody Orderreq orderreq, @PathVariable("certuserId") Long certuserId, @PathVariable("companyId") Long companyId){
-        orderreqService.addOrderReqs(orderreq, certuserId, companyId);
+
+        @GetMapping("/company")
+    public List<Orderreq> getCompanyOrders(@RequestParam("username") String username){
+        return orderreqService.getCompanyOrders(username);
     }
+
+
+//    @GetMapping("/company/{id}")
+//    public List<Orderreq> getCompanyOrders(@PathVariable("id") Long id){
+//        return orderreqService.getCompanyOrders(id);
+//    }
+
+//    @GetMapping("/company")
+//    public List<Orderreq> getCompanyOrdersByName(@RequestParam("username") String username){
+//        return orderreqService.getCompanyOrdersByName(username);
+//    }
+
+
+    @PostMapping("/addorder/user/{personId}/company/{companyId}/cert/{certstatusId}")
+    public void addOrderReqs(@RequestBody Orderreq orderreq, @PathVariable("personId") Long personId, @PathVariable("companyId") Long companyId, @PathVariable("certstatusId") Long certstatusId){
+        orderreqService.addOrderReqs(orderreq, personId, companyId, certstatusId);
+    }
+
+    @PutMapping("/updatestatus/{id}")
+    public Orderreq updateStatus (@RequestBody Orderreq orderreq, @PathVariable Long id){
+
+        return orderreqService.updateStatus(orderreq, id);
+    }
+
+
+
 }
