@@ -25,7 +25,6 @@ function CertificateDrawer({showCertDrawer, setShowCertDrawer, username,certific
                 successNotification(
                     "Behörighet tillagd"
                 )
-                fetchCertificate();
             }).catch(err => {
             err.response.json().then(res => {
                 console.log(err);
@@ -36,6 +35,7 @@ function CertificateDrawer({showCertDrawer, setShowCertDrawer, username,certific
                 )
             });
         }).finally(() => {
+            fetchCertificate();
             setSubmitting(false);
         })
     };

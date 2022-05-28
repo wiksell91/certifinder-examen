@@ -11,7 +11,7 @@ const {Option} = Select;
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus, companyId, certStatusId}) {
+function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus, companyId, certStatusId, fetchOrderreqs}) {
     const onCLose = () => setShowDrawer(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -36,6 +36,7 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
                 )
             });
         }).finally(() => {
+            fetchOrderreqs();
             setSubmitting(false);
         })
     };
@@ -76,20 +77,6 @@ function NewOrderDrawer({showDrawer, setShowDrawer, certuserId, fetchCertstatus,
                     >
                         <Select>
                             <Option value="OBESVARAD">Obesvarad</Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-                <Col span={8}>
-                    <Form.Item
-                        name="ordertype"
-                        label="Ordertyp"
-                        rules={[{required: true, message: 'Vänligen välj ordertyp'}]}
-                    >
-                        <Select placeholder="Vänligen välj ordertyp">
-                            <Option value="tungalyft">Tungalyft</Option>
-                            <Option value="Lastbil">Lastbil</Option>
-                            <Option value="Truck">Truck</Option>
-                            <Option value="Hetarbete">Hetarbete</Option>
                         </Select>
                     </Form.Item>
                 </Col>

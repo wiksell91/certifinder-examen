@@ -53,4 +53,10 @@ public class CertuserController {
     }
 
 
+    @DeleteMapping("/deletecomp/{username}")
+    public void deleteCompany(@PathVariable ("username") String username){
+        certuserService.deleteCompany(username);
+    }
+
+
 }

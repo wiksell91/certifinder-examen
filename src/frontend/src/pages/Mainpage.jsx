@@ -143,8 +143,8 @@ function Mainpage  () {
                 <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
                     <Input />
                 </Form.Item>
-                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: false }]}>
-                    <Input />
+                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: true }]}>
+                    <Input type="password" />
                 </Form.Item>
                 <Form.Item name= "city" label="Stad" rules={[{ required: false }]}>
                     <Input />
@@ -190,8 +190,8 @@ function Mainpage  () {
                 <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
                     <Input />
                 </Form.Item>
-                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: false }]}>
-                    <Input />
+                <Form.Item type="password" name= "password" label="Lösenord" rules={[{ required: true }]}>
+                    <Input type="password" />
                 </Form.Item>
                 <Form.Item name= "city" label="Stad" rules={[{ required: false }]}>
                     <Input />
@@ -219,8 +219,6 @@ function Mainpage  () {
                 return  addCompany();
             case "3":
                 return addUser();
-            case "4":
-                return login();
             default:
                 break;
 
@@ -249,13 +247,10 @@ function Mainpage  () {
                 <Menu.Item key="3" >
                     Nytt konto privat
                 </Menu.Item>
-                <Menu.Item key="4" >
-                    Vänta
-                </Menu.Item>
             </Menu>
         </Sider>
         <Layout>
-            <Header className="site-layout-sub-header-background" style={{padding: 0}}></Header>
+            <Header className="site-layout-sub-header-background" style={{padding: 0, textAlign: 'center', fontWeight:"bold",color: "lightblue"}}>CERTIFINDER</Header>
             <Content style={{margin: '24px 16px 0'}}>
                 <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
 
@@ -266,21 +261,6 @@ function Mainpage  () {
         </Layout>
     </Layout>
 }
-// const mapStateToProps=({auth})=>{
-//     console.log("state ",auth)
-//     return {
-//         loading:auth.loading,
-//         error:auth.error
-//     }}
-//
-//
-// const mapDispatchToProps=(dispatch)=>{
-//
-//     return {
-//         authenticate :()=> dispatch(authenticate()),
-//         setCompany:(data)=> dispatch(authSuccess(data)),
-//         loginFailure:(message)=>dispatch(authFailure(message))
-//     }
-// }
+
 
 export default Mainpage;

@@ -9,6 +9,7 @@ import {errorNotification, successNotification} from "../Notification"
 import ajax from "../Service/fetchService";
 import {useUser} from "../UserProvider";
 import {useNavigate} from "react-router-dom";
+
 import {getUserOrders, getUserByUserName, updateUser, getAllCertificate, deleteUser} from "../client";
 import {Option} from "antd/es/mentions";
 const {Header, Content, Footer, Sider} = Layout;
@@ -29,7 +30,7 @@ function UserPage (){
     const [certuserId, setCertuserId] = useState(null);
     const user = useUser();
     const [certuser, setCertuser] = useState(null);
-    const [certificate, setCertificate] = useState(null);
+    const [certificates, setCertificates] = useState([]);
     const navigate = useNavigate();
     const [userInfo, setUserIfo] = useState([]);
     const [submitting, setSubmitting] = useState(false);
@@ -54,26 +55,26 @@ function UserPage (){
             .then(res => res.json())
             .then(data => {
                 setUserIfo(data);
-            }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res);
-                errorNotification(
-                    "There was an issue",
-                    `${res.message} [${res.status}] [${res.error}]`
-                )
-            });
+            // }).catch(err => {
+            // console.log(err.response)
+            // err.response.json().then(res => {
+            //     console.log(res);
+            //     errorNotification(
+            //         "There was an issue",
+            //         `${res.message} [${res.status}] [${res.error}]`
+            //     )
+            // });
         }).finally(() => setFetching(false))
 
-        useEffect(() => {
-            fetchUser();
-        },[username] );
+    useEffect(() => {
+        fetchUser();
+    },[username] );
 
     const fetchCertificate = () =>
         getAllCertificate()
             .then(res => res.json())
             .then(data => {
-                setCertificate(data);
+                setCertificates(data);
             }).catch(err => {
             console.log(err.response)
             err.response.json().then(res => {
@@ -89,18 +90,13 @@ function UserPage (){
         fetchCertificate();
     },[] );
 
-
-    const logOut = () =>{
-        user.setJwt(null);
-        navigate('/');
-        localStorage.clear();
-    }
-
-    const removeUser = (username) => {
-        deleteUser(username).then(() => {
-            successNotification("Användaren raderad");
-            navigate('/');
-        }).catch(err => {
+    const fetchOrderreq = () =>
+        getUserOrders([username])
+            .then(res => res.json())
+            .then(data => {
+                setOrderreqs(data);
+            }).catch(err => {
+            console.log(err.response)
             err.response.json().then(res => {
                 console.log(res);
                 errorNotification(
@@ -108,83 +104,14 @@ function UserPage (){
                     `${res.message} [${res.status}] [${res.error}]`
                 )
             });
-        })
-    }
-    const fetchOrderreq = () =>
-    getUserOrders([username])
-        .then(res => res.json())
-        .then(data => {
-            setOrderreqs(data);
-        }).catch(err => {
-        console.log(err.response)
-        err.response.json().then(res => {
-            console.log(res);
-            errorNotification(
-                "There was an issue",
-                `${res.message} [${res.status}] [${res.error}]`
-            )
-        });
-    }).finally(() => setFetching(false))
+        }).finally(() => setFetching(false))
 
     useEffect(() => {
         fetchOrderreq();
-    },[username] );
+    },[username]);
 
 
-    const renderOrderreqs = () => {
-        if(fetching) {
-            return <Spin indicator={antIcon}/>
-        }
-        if (orderreqs.length <= 0) {
-            return <Empty />;
-        }
-        return <>
-            <UpdateOrderDrawer
-              showOrderDrawer={showOrderDrawer}
-              setShowOrderDrawer = {setShowOrderDrawer}
-              orderreqId = {orderreqId}
-              fetchOrderreq = {fetchOrderreq}
-            />
-            <Table dataSource={orderreqs}
-                      columns={orders}
-                      bordered
-                      title={() => 'Arbetsförfrågningar'}
-                      pagination={{pageSize: 15}}
-            //scroll={{y:250}}
-                      rowKey={(orderreqs) => orderreqs.id}
-        />
-        </>
-    }
-
-
-
-
-    const cert =  [
-        {
-        title: 'Behörighets typ',
-        dataIndex: 'certType',
-        key: 'certType',
-        },
-        {
-            title: 'Bransch',
-            dataIndex: 'bransch',
-            key: 'bransch',
-        },
-        {
-            title: 'Lägg till',
-            key: 'actions',
-            render: (text, certificate) =>
-                <Radio.Group>
-                    <Radio.Button  value="small"onClick={() => {
-                        setCertificateId(certificate.id)
-                        setShowCertDrawer(!showCertDrawer)}}
-                    >Lägg till Behörighet</Radio.Button>
-                </Radio.Group>
-
-        }
-    ];
-
-    const orders =  [
+    const orders = fetchOrderreq =>  [
         {
             title: 'Företag',
             dataIndex: ['company', 'fullName'],
@@ -224,11 +151,93 @@ function UserPage (){
         }
     ];
 
-    const renderCerts = () => {
+    const certtable = fetchCertificate =>  [
+        {
+            title: 'Behörighets typ',
+            dataIndex: 'certType',
+            key: 'certType',
+        },
+        {
+            title: 'Bransch',
+            dataIndex: 'bransch',
+            key: 'bransch',
+        },
+        {
+            title: 'Lägg till',
+            key: 'actions',
+            render: (text, certificates) =>
+                <Radio.Group>
+                    <Radio.Button  value="small"onClick={() => {
+                        setCertificateId(certificates.id)
+                        setShowCertDrawer(!showCertDrawer)}}
+                    >Lägg till Behörighet</Radio.Button>
+                </Radio.Group>
+
+        }
+    ];
+
+
+
+
+    const logOut = () =>{
+        user.setJwt(null);
+        navigate('/');
+        localStorage.clear();
+    }
+
+    const removeUser = (username) => {
+        deleteUser(username).then(() => {
+            successNotification("Användaren raderad");
+            setUserIfo([]);
+            user.setJwt(null);
+            localStorage.clear();
+            navigate('/');
+        }).catch(err => {
+            err.response.json().then(res => {
+                console.log(res);
+                errorNotification(
+                    "There was an issue",
+                    `${res.message} [${res.status}] [${res.error}]`
+                )
+            });
+        })
+    }
+
+
+
+    const renderOrderreqs = () => {
         if(fetching) {
             return <Spin indicator={antIcon}/>
         }
         if (orderreqs.length <= 0) {
+            return <Empty />;
+        }
+        return <>
+            <UpdateOrderDrawer
+              showOrderDrawer={showOrderDrawer}
+              setShowOrderDrawer = {setShowOrderDrawer}
+              orderreqId = {orderreqId}
+              fetchOrderreq = {fetchOrderreq}
+            />
+            <Table dataSource={orderreqs}
+                      columns={orders(fetchOrderreq)}
+                      bordered
+                      title={() => 'Arbetsförfrågningar'}
+                      pagination={{pageSize: 15}}
+            //scroll={{y:250}}
+                      rowKey={(orderreqs) => orderreqs.id}
+        />
+        </>
+    }
+
+
+
+
+    const renderCerts = () => {
+        if(fetching) {
+            return <Spin indicator={antIcon}/>
+        }
+        if (certificates.length <= 0) {
             return <Empty />;
         }
         return <>
@@ -239,18 +248,19 @@ function UserPage (){
                 username = {username}
                 fetchCertificate = {fetchCertificate}
             />
-            <Table dataSource={certificate}
-                   columns={cert}
+            <Table dataSource={certificates}
+                   columns={certtable(fetchCertificate)}
                    bordered
                    title={() => 'Godkända behörigheter'}
                    pagination={{pageSize: 15}}
                 //scroll={{y:250}}
-                   rowKey={(certificate) => certificate.id}
+                   rowKey={(certificates) => certificates.id}
             />
         </>
     }
 
-    const  updateUsers =  () => {
+    const  updateUsers = () => {
+        fetchUser();
         const onFinish = user => {
             setSubmitting(true)
             updateUser([username], user)
@@ -274,7 +284,7 @@ function UserPage (){
 
         return (
             <Form name="nest-messages" onFinish={onFinish} >
-                <Form.Item name="fullName" label="Företagsnamn" rules={[{ required: false }]}>
+                <Form.Item name="fullName" label="Fullständigt namn" rules={[{ required: false }]}>
                     <Input placeholder={userInfo.fullName} />
                 </Form.Item>
                 <Form.Item name= "username" label="Email" rules={[{ type: 'email' , required: true}]}>
@@ -315,8 +325,6 @@ function UserPage (){
                 return  renderOrderreqs();
             case "3":
                 return updateUsers() ;
-            case "4":
-                return ;
             default:
                 break;
 
@@ -344,10 +352,7 @@ function UserPage (){
                     Nya Förfrågningar
                 </Menu.Item>
                 <Menu.Item key="3" icon={<UploadOutlined/>}>
-                    Mina behörigheter
-                </Menu.Item>
-                <Menu.Item key="4" icon={<UserOutlined/>}>
-                    nav 4
+                    Min info
                 </Menu.Item>
             </Menu>
         </Sider>

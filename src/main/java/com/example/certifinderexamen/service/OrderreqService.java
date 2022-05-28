@@ -76,7 +76,7 @@ public class OrderreqService {
         return orderreqRepository.findOrderreqByUser(username);
     }
 
-    public Orderreq updateStatus(Orderreq orderreq, Long id) {
+    public Orderreq updateOrder(Orderreq orderreq, Long id) {
 
         Orderreq order = orderreqRepository.findById(id).get();
 

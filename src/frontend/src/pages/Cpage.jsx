@@ -1,6 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from "react";
-import {getAllCert, getCompanyOrders, getUserByUserName, updateUser, deleteUser} from "../client";
+import {getAllCert, getCompanyOrders, getUserByUserName, updateUser, deleteCompany} from "../client";
 import { useNavigate } from "react-router-dom";
 import ajax from "../Service/fetchService";
 import { useUser } from "../UserProvider";
@@ -36,10 +36,8 @@ function Cpage ()  {
     const navigate = useNavigate();
     const [companyId, setCompanyId] =useState(null);
     const [submitting, setSubmitting] = useState(false);
-    const [userInfos, setUserIfos] = useState([]);
+    const [userInfos, setUserInfos] = useState([]);
     const [certStatusId, setCertStatusId] = useState(null);
-
-
 
 
 
@@ -58,15 +56,6 @@ function Cpage ()  {
             }
         }, [user.jwt]);
 
-        //
-        // useEffect(() => {
-        //     fetch(`/api/v1/orderreq/company/${companyId}`)
-        //         .then((orderreqData) => {
-        //             setOrderreqs(orderreqData);
-        //         });
-        // }, []);
-
-
 
         const logOut = () =>{
             user.setJwt(null);
@@ -76,7 +65,11 @@ function Cpage ()  {
 
 
     const removeUser = (username) => {
-        deleteUser(username).then(() => {
+        deleteCompany(username).then(() => {
+            successNotification("Användaren raderad");
+            setUserInfos([]);
+            user.setJwt(null);
+            localStorage.clear();
             navigate('/');
         }).catch(err => {
             err.response.json().then(res => {
@@ -89,7 +82,68 @@ function Cpage ()  {
         })
     }
 
-        const users  =  [
+    const fetchCertstatus = () =>
+        getAllCert()
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                setCertstatus(data);
+            }).catch(err => {
+            console.log(err.response)
+            err.response.json().then(res => {
+                console.log(res);
+                errorNotification(
+                    "There was an issue",
+                    `${res.message} [${res.status}] [${res.error}]`
+                )
+            });
+        }).finally(() => setFetching(false))
+
+    useEffect(() => {
+        fetchCertstatus();
+    }, []);
+
+    const fetchOrderreqs = () =>
+        getCompanyOrders([username])
+            .then(res => res.json())
+            .then(data => {
+                setOrderreqs(data);
+            }).catch(err => {
+            console.log(err.response)
+            err.response.json().then(res => {
+                console.log(res);
+                errorNotification(
+                    "There was an issue",
+                    `${res.message} [${res.status}] [${res.error}]`
+                )
+            });
+        }).finally(() => setFetching(false))
+
+    useEffect(() => {
+        fetchOrderreqs();
+    }, [username]);
+
+    const fetchUsers = () =>
+        getUserByUserName([username])
+            .then(res => res.json())
+            .then(data => {
+                setUserInfos(data);
+            // }).catch(err => {
+            // console.log(err.response)
+            // err.response.json().then(res => {
+            //     console.log(res);
+            //     errorNotification(
+            //         "There was an issue",
+            //         `${res.message} [${res.status}] [${res.error}]`
+            //     )
+            // });
+        }).finally(() => setFetching(false))
+
+    useEffect(() => {
+        fetchUsers();
+    },[username] );
+
+        const certs  = fetchCertstatus  => [
             {
                 title: 'Namn',
                 dataIndex: ['certuser', 'fullName'],
@@ -129,27 +183,39 @@ function Cpage ()  {
 
 
 
-    const fetchCertstatus = () =>
-        getAllCert()
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                setCertstatus(data);
-            }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res);
-                errorNotification(
-                    "There was an issue",
-                    `${res.message} [${res.status}] [${res.error}]`
-                )
-            });
-        }).finally(() => setFetching(false))
 
-    useEffect(() => {
-        fetchCertstatus();
-    }, []);
-
+    const orders = fetchOrderreqs => [
+        {
+            title: 'Namn',
+            dataIndex: ['person', 'fullName'],
+            key: 'FullName',
+        },
+        {
+            title: 'Behörighetstyp',
+            dataIndex: 'ordertype',
+            key: 'ordertype',
+        },
+        {
+            title: 'Kommentar',
+            dataIndex:  'comment',
+            key: 'comment',
+        },
+        {
+            title: 'Arbetsdatum',
+            dataIndex:  'orderdate',
+            key: 'orderdate',
+        },
+        {
+            title: 'Företag',
+            dataIndex: ['company', 'fullName'],
+            key: 'FullName',
+        },
+        {
+            title: 'status',
+            dataIndex: 'orderstatus',
+            key: 'orderstatus'
+        },
+    ];
     const renderCertstatus = () => {
         if(fetching) {
             return <Spin indicator={antIcon}/>
@@ -161,78 +227,26 @@ function Cpage ()  {
             <NewOrderDrawer
                 showDrawer={showDrawer}
                 setShowDrawer={setShowDrawer}
-                // fetchOrderreqs={fetchOrderreqs}
                 certuserId = {certuserId}
                 companyId={companyId}
                 certStatusId={certStatusId}
                 fetchCertstatus={fetchCertstatus}
+                fetchOrderreqs={fetchOrderreqs}
 
             />
             <Table dataSource={certstatus}
-                   columns={users}
+                   columns={certs(fetchCertstatus)}
                    bordered
                    title={() => 'Våra Certifinders'}
                    pagination={{pageSize: 15}}
                 //scroll={{y:250}}
-                  rowKey={(certstatus) => certstatus.certuser.id}
+                   rowKey={(certstatus) => certstatus.certuser.id}
             />
         </>
     }
-        const orders =  [
-            {
-                title: 'Namn',
-                dataIndex: ['person', 'fullName'],
-                key: 'FullName',
-            },
-            {
-                title: 'Behörighetstyp',
-                dataIndex: 'ordertype',
-                key: 'ordertype',
-            },
-            {
-                title: 'Kommentar',
-                dataIndex:  'comment',
-                key: 'comment',
-            },
-            {
-                title: 'Arbetsdatum',
-                dataIndex:  'orderdate',
-                key: 'orderdate',
-            },
-            {
-                title: 'Företag',
-                dataIndex: ['company', 'fullName'],
-                key: 'FullName',
-            },
-            {
-                title: 'status',
-                dataIndex: 'orderstatus',
-                key: 'orderstatus'
-            },
-        ];
-
-        const fetchOrderreqs = () =>
-        getCompanyOrders([username])
-            .then(res => res.json())
-            .then(data => {
-                setOrderreqs(data);
-            }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res);
-                errorNotification(
-                    "There was an issue",
-                    `${res.message} [${res.status}] [${res.error}]`
-                )
-            });
-        }).finally(() => setFetching(false))
-
-        useEffect(() => {
-            fetchOrderreqs();
-        }, [username]);
-
 
         const renderOrderreqs = () => {
+            fetchOrderreqs();
             if(fetching) {
                 return <Spin indicator={antIcon}/>
             }
@@ -240,37 +254,17 @@ function Cpage ()  {
                 return <Empty />;
             }
             return <Table dataSource={orderreqs}
-                          columns={orders}
+                          columns={orders(fetchOrderreqs)}
                           bordered
                           title={() => 'Arbetsförfrågningar'}
                           pagination={{pageSize: 15}}
                 //scroll={{y:250}}
                           rowKey={(orderreqs) => orderreqs.id}
             />;
-
         }
-    const fetchUsers = () =>
-        getUserByUserName([username])
-            .then(res => res.json())
-            .then(data => {
-                setUserIfos(data);
-            }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res);
-                errorNotification(
-                    "There was an issue",
-                    `${res.message} [${res.status}] [${res.error}]`
-                )
-            });
-        }).finally(() => setFetching(false))
 
-    useEffect(() => {
-        fetchUsers();
-    },[username] );
 
     const updateComp = () => {
-        fetchUsers();
         const onFinish = user => {
             setSubmitting(true)
             updateUser([username], user)
@@ -336,8 +330,6 @@ function Cpage ()  {
                 return renderOrderreqs();
             case "3":
                 return updateComp();
-            case "4":
-                return ;
             default:
                 break;
 
@@ -365,15 +357,12 @@ function Cpage ()  {
                     Förfrågningar
                 </Menu.Item>
                 <Menu.Item key="3" icon={<UploadOutlined/>}>
-                    nav 3
-                </Menu.Item>
-                <Menu.Item key="4" icon={<UserOutlined/>}>
-                    nav 4
+                    Kontoinformation
                 </Menu.Item>
             </Menu>
         </Sider>
         <Layout>
-            <Header className="site-layout-sub-header-background" style={{padding: 0}} ><div style={{ display: "flex" }}><Button style={{ marginLeft: "auto" }}  type="primary" onClick={() =>logOut()}>Logga ut</Button></div></Header>
+            <Header className="site-layout-sub-header-background" style={{padding: 0}}><div style={{ display: "flex" }}><Button style={{ marginLeft: "auto" }}  type="primary" onClick={() =>logOut()}>Logga ut</Button></div></Header>
             <Content style={{margin: '24px 16px 0'}}>
                 <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
 

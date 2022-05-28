@@ -67,6 +67,11 @@ export const deleteUser = username =>
         method: 'DELETE'
     }).then(checkStatus);
 
+export const deleteCompany = username =>
+    fetch(`api/v1/account/deletecomp/${username}`, {
+        method: 'DELETE'
+    }).then(checkStatus);
+
 export const updateUser = (username, certuser) =>
     fetch(`/api/v1/account/update/${username}`,{
         headers: {

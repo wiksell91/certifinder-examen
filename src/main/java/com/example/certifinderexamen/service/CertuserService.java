@@ -101,6 +101,15 @@ public class CertuserService {
 
     }
 
+    public void deleteCompany(String username){
+        Certuser company = certuserRepository.findCertuserByUsername(username);
+        List<Orderreq> order = orderreqRepository.findOrderreqByCompany(username);
+        List<Authorities> authorities = authorityRepository.findAllByUserId(company.getId());
+        orderreqRepository.deleteAll(order);
+        authorityRepository.deleteAll(authorities);
+        certuserRepository.deleteById(company.getId());
+    }
+
 
 
 }

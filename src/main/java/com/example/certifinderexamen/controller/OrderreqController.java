@@ -56,14 +56,15 @@ public class OrderreqController {
 
 
     @PostMapping("/addorder/user/{personId}/company/{companyId}/cert/{certstatusId}")
-    public void addOrderReqs(@RequestBody Orderreq orderreq, @PathVariable("personId") Long personId, @PathVariable("companyId") Long companyId, @PathVariable("certstatusId") Long certstatusId){
+    public void addOrderReqs(@RequestBody Orderreq orderreq, @PathVariable("personId") Long personId,
+                             @PathVariable("companyId") Long companyId, @PathVariable("certstatusId") Long certstatusId){
         orderreqService.addOrderReqs(orderreq, personId, companyId, certstatusId);
     }
 
     @PutMapping("/updatestatus/{id}")
-    public Orderreq updateStatus (@RequestBody Orderreq orderreq, @PathVariable Long id){
+    public Orderreq updateOrder (@RequestBody Orderreq orderreq, @PathVariable Long id){
 
-        return orderreqService.updateStatus(orderreq, id);
+        return orderreqService.updateOrder(orderreq, id);
     }
 
 
